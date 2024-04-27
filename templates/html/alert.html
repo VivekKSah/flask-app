@@ -1,0 +1,12 @@
+{% extends 'html/base.html' %}
+{% block content %}
+
+    <section>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div role="alert">{{ message }}</div>
+    {% endfor %}
+
+    </section>
+
+{% endblock %}
