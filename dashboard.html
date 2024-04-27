@@ -1,0 +1,139 @@
+{% extends 'html/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block head %}Dashboard{% endblock %}
+{% block content %}
+
+  {% if g.user %}
+    <section>
+      <h2>Capture Image</h2>
+      <video id="video">Video stream not available.</video><br>
+      <button id="startbutton">Take photo</button><br>
+      <canvas id="canvas"></canvas>
+      <br><br>
+      <button id="savebutton" style="display:none;">Save photo</button><br>
+    </section>
+
+    <section>
+      <h2>Save Image</h2>
+      {% if image %}
+        <img src="{{ url_for('static', filename='uploads/' + image.filename) }}">
+        <form action="{{ url_for('dashboard') }}" method="post">
+          <label for="name">Name:</label>
+          <input type="text" name="name" id="name"><br>
+          <label for="description">Description:</label>
+          <textarea name="description" id="description"></textarea><br>
+          <label for="date">Date:</label>
+          <input type="datetime-local" name="date" id="date"><br>
+          <button type="submit" name="action" value="enter_details">Enter Details</button>
+        </form>
+      {% else %}
+        <p>No image captured.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      {% if image %}
+        {% if details %}
+          <h2>Edit Image Details</h2>
+          <form action="{{ url_for('dashboard') }}" method="post">
+            <label for="name">Name:</label>
+            <input type="text" name="name" id="name" value="{{ details.name }}"><br>
+            <label for="description">Description:</label>
+            <textarea name="description" id="description">{{ details.description }}</textarea><br>
+            <label for="date">Date:</label>
+            <input type="datetime-local" name="date" id="date" value="{{ details.date|datetimeformat }}"><br>
+            <button type="submit" name="action" value="edit_details">Save Changes</button>
+          </form>
+        {% else %}
+          <p>No image details found.</p>
+        {% endif %}
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Share Image</h2>
+      {% if shared_images %}
+        <ul>
+          {% for shared_image in shared_images %}
+            <li><a href="{{ url_for('dashboard', image_id=shared_image.id) }}"><img src="{{ url_for('static', filename='uploads/' + shared_image.filename) }}"></a></li>
+          {% endfor %}
+        </ul>
+        <form action="{{ url_for('dashboard') }}" method="post">
+          <label for="share_email">Email:</label>
+          <input type="email" name="share_email" id="share_email"><br>
+          <button type="submit" name="action" value="share_image">Share Image</button>
+        </form>
+      {% else %}
+        <p>No images shared with you yet.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>My Captured Images</h2>
+      {% if images %}
+        <ul>
+          {% for image in images %}
+            <li><a href="{{ url_for('dashboard', image_id=image.id) }}"><img src="{{ url_for('static', filename='uploads/' + image.filename) }}"></a></li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No images captured yet.</p>
+      {% endif %}
+    </section>
+  {% else %}
+    <section>
+      <p>Please login to view the dashboard.</p>
+    </section>
+  {% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Grab elements, create settings, etc.
+var video = document.getElementById('video');
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var saveButton = document.getElementById('savebutton');
+
+// Get user media
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  // Request the camera
+  navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+    // Set the video source
+    video.srcObject = stream;
+    video.play();
+  }).catch(function(err) {
+    console.log('Error accessing camera:', err.message);
+  });
+
+  // Take photo button click event
+  document.getElementById('startbutton').addEventListener('click', function() {
+    // Draw the video frame onto the canvas
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // Show the save button
+    saveButton.style.display = 'block';
+  });
+
+  // Save photo button click event
+  saveButton.addEventListener('click', function() {
+    // Construct a FormData object containing the image data and the user's details
+    var formData = new FormData();
+    formData.append('image', canvas.toDataURL());
+    formData.append('name', document.getElementById('name').value);
+    formData.append('description', document.getElementById('description').value);
+    formData.append('date', document.getElementById('date').value);
+    // Send the data to the server using AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/dashboard', true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        console.log(xhr.responseText);
+      }
+    };
+    xhr.send(formData);
+  });
+}
+</script>
+{% endblock %}

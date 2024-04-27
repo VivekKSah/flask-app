@@ -1,0 +1,43 @@
+{% extends "html/base.html" %}
+{% block title %}User Profile{% endblock %}
+{% block head %}User Profile{% endblock %}
+{% block content %}
+
+  <section>
+      <h2>{{ g.user["email"] }}</h2>
+
+      {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div role="alert">{{ message }}</div>
+      {% endfor %}
+
+      <hr>
+      <form action="{{ url_for("profile") }}" method="post">
+        <h3>Personal Information</h3>
+          <label for="name">Name:</label>
+          <input type="text" name="name" id="name" value="{{ user_details[1] }}">
+          <label for="phone">Phone:</label>
+          <input type="tel" name="phone" id="phone" value="{{ user_details[4] }}">
+          <label for="address">Address:</label>
+          <input type="text" name="address" id="address" value="{{ user_details[5] }}">
+          <label for="city">City:</label>
+          <input type="text" name="city" id="city" value="{{ user_details[6] }}">
+          <label for="country">Country:</label>
+          <input type="text" name="country" id="country" value="{{ user_details[7] }}">
+	  <br><br>
+        <button type="submit" name="action" value="update_profile">Update Profile</button>
+      </form>
+      <hr>
+      <form action="{{ url_for("profile") }}" method="post">
+        <h3>Change Password</h3>
+          <label for="old_password">Old Password:</label>
+          <input type="password" name="old_password" id="old_password" required>
+          <label for="new_password">New Password:</label>
+          <input type="password" name="new_password" id="new_password" required>
+          <label for="confirm_password">Confirm New Password:</label>
+          <input type="password" name="confirm_password" id="confirm_password" required>
+	  <br><br>
+        <button type="submit" name="action" value="change_password">Change Password</button>
+      </form>
+  </section>
+
+{% endblock %}

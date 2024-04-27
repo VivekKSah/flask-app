@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+            {% block title %}New App{% endblock %}
+    </title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/styles.css') }}">
+  </head>
+  <body>
+    	<header>
+	    <h1>{% block head %}Welcome to New App{% endblock %}</h1>
+    	</header>
+
+  	<nav>
+        	<ul>
+			<li><a href="/">Home</a></li>
+			
+			{% if g.user %}
+				{% if request.path == "/dashboard" %}
+      				<li><a href="/profile">User Profile</a></li>
+      				{% else %}
+        			<li><a href="/dashboard">Dashboard</a></li>
+      				{% endif %}
+      			<li><a href="/logout">Logout</a></li>
+    			{% else %}
+      			<li><a href="/login">Login</a></li>
+      			<li><a href="/signup">Signup</a></li>
+    			{% endif %}
+
+            		<li><a href="/about">About</a></li>
+            		<li><a href="/contact">Contact</a></li>
+        	</ul>
+    	</nav>
+
+        <br/>
+          {% block content %}
+          {% endblock %}
+          {% block scripts %}
+          {% endblock %}
+	<footer>
+        	<p>&copy; 2023 New App. All rights reserved.</p>
+    	</footer>
+  </body>
+</html>
